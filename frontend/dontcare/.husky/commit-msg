@@ -1,0 +1,7 @@
+#!/bin/sh
+# git hook 스크립트가 node_modules의 실행 파일을 찾을 수 있도록 PATH를 설정합니다.
+cd "$(dirname "$0")/.."
+PATH="$(pwd)/node_modules/.bin:$PATH"
+
+# commitlint가 자동으로 설정 파일을 찾도록 합니다 (commitlint.config.mjs)
+commitlint --edit "$1"
