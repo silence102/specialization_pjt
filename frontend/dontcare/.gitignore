@@ -22,7 +22,9 @@ dist-ssr
 .env.*.local
 .env.*
 !.env.example
-.npmrc# Editor directories and files
+.npmrc
+
+# Editor directories and files
 .vscode/*
 !.vscode/extensions.json
 .idea
@@ -39,3 +41,4 @@ dist-ssr
 .claude/
 .cursor/
 CLAUDE.md
+API_GUIDE.md

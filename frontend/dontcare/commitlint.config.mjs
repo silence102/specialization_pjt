@@ -1,9 +1,12 @@
 export default {
   extends: ['@commitlint/config-conventional'],
   parserPreset: {
+    // Preserve conventional defaults while customizing header parsing.
+    name: 'conventional-changelog-conventionalcommits',
     parserOpts: {
-      headerPattern: /^<(\w+)> (\w+): (.*)$/,
-      headerCorrespondence: ['scope', 'type', 'subject'],
+      // Allow optional breaking "!" after type; keep it out of the captured type.
+      headerPattern: /^<([A-Z]{2,3})> (\w+)(!)?: (.+)$/,
+      headerCorrespondence: ['scope', 'type', 'breaking', 'subject'],
     },
   },
   rules: {

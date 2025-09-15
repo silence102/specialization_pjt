@@ -25,8 +25,11 @@ fi
 export HUSKY_GIT_PARAMS
 
 # HUSKY_GIT_STDIN을 설정합니다
-if [ -z "${HUSKY_GIT_STDIN+x}" ] && [ ! -t 0 ]; then
-  HUSKY_GIT_STDIN="$(cat)"
+if [ -t 0 ]; then
+  HUSKY_GIT_STDIN=""
+else
+  # Capture piped stdin if any (can be empty)
+  HUSKY_GIT_STDIN="$(cat -)"
 fi
 
 # HUSKY_HOOK_NAME을 설정합니다
@@ -34,6 +37,10 @@ if [ -z "${HUSKY_HOOK_NAME+x}" ]; then
   HUSKY_HOOK_NAME="$(basename "$0")"
 fi
 export HUSKY_HOOK_NAME
+
+# 스크립트의 절대 디렉터리를 계산해 하위 프로세스에 전달합니다
+HUSKY_DIR="$(CDPATH= cd -- "$(dirname -- "$0")" && pwd -P)"
+export HUSKY_DIR
 
 # Husky는 직접 source해서 사용하도록 설계되지 않았습니다.
 # 아래는 사용자가 잘못 사용하고 있음을 알려주기 위한 것입니다.
@@ -62,14 +69,30 @@ export HUSKY_GIT_STDIN
 # 훅 실행
 node -e "
   const { spawn } = require('child_process');
-  const hook = require('path').join(__dirname, '..', process.env.HUSKY_HOOK_NAME);
+  const fs = require('fs');
+  const path = require('path');
+  const hook = path.join(process.env.HUSKY_DIR, process.env.HUSKY_HOOK_NAME);
 
-  const child = spawn(hook, process.argv.slice(1), {
-    stdio: 'inherit'
+  if (!fs.existsSync(hook)) {
+    console.error(\`Husky: hook not found: \${hook}\`);
+    process.exit(0);
+  }
+
+  const child = spawn(hook, process.argv.slice(3), {
+    stdio: 'inherit',
+    shell: process.platform === 'win32' // improve Windows compat for shell scripts
   });
 
   child.on('error', (err) => {
     console.error(err);
     process.exit(1);
+  });
+
+  child.on('exit', (code, signal) => {
+    if (signal) {
+      console.error(\`Husky: hook terminated by signal \${signal}\`);
+      process.exit(1);
+    }
+    process.exit(code ?? 1);
   });
 " "$@"
