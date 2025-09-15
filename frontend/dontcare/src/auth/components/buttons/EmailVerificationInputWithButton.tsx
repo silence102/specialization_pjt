@@ -10,19 +10,17 @@ const DEFAULT_TEXTS = {
 } as const;
 
 interface EmailVerificationInputWithButtonProps
-  extends Omit<ComponentPropsWithoutRef<'input'>, 'type'> {
+  extends Omit<ComponentPropsWithoutRef<'input'>, 'type' | 'className'> {
   error?: FieldError;
   label?: string;
   placeholder?: string;
   description?: string | string[];
   persistentDescription?: boolean;
-  className?: string;
   labelClassName?: string;
   inputClassName?: string;
   errorClassName?: string;
   descriptionClassName?: string;
   containerClassName?: string;
-  type?: 'text';
   buttonText: string;
   buttonLoading?: boolean;
   buttonDisabled?: boolean;
@@ -65,16 +63,15 @@ export const EmailVerificationInputWithButton = forwardRef<
         <div className="flex gap-2">
           <Input
             ref={ref}
+            {...props}
             type="text"
             placeholder={placeholder}
             autoComplete="one-time-code"
             inputMode="numeric"
             maxLength={6}
             className={`flex-1 border-white/20 bg-white/5 text-white placeholder:text-white/60 focus:border-white/40 focus:ring-white/20 ${inputClassName || ''}`}
-            {...props}
           />
           <Button
-            type="button"
             onClick={onButtonClick}
             disabled={buttonDisabled || buttonLoading}
             className="btn-cta-primary whitespace-nowrap px-4 py-2 text-sm"

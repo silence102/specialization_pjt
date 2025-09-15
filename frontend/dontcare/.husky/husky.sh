@@ -12,11 +12,13 @@ command -v node >/dev/null 2>&1 || {
   exit 0
 }
 
-# pnpm이 PATH에 있는지 확인합니다
-command -v pnpm >/dev/null 2>&1 || {
-  echo >&2 "Info: pnpm is not in PATH. Skipping husky."
-  exit 0
-}
+# Check for package manager (optional - only warn if needed)
+if [ ! -z "${HUSKY_REQUIRE_PNPM}" ]; then
+  command -v pnpm >/dev/null 2>&1 || {
+    echo >&2 "Info: pnpm is not in PATH. Skipping husky."
+    exit 0
+  }
+fi
 
 # HUSKY_GIT_PARAMS를 설정합니다
 if [ -z "${HUSKY_GIT_PARAMS+x}" ]; then

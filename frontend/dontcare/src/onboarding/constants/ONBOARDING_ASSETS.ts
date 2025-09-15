@@ -1,13 +1,13 @@
 export type OnboardingAssets = {
-  BG: {
-    SHAPE: string;
-    ARCH: string;
-    DECO1: string;
-    DECO2: string;
-    DECO3: string;
-    DECO4: string;
+  readonly BG: {
+    readonly SHAPE: string;
+    readonly ARCH: string;
+    readonly DECO1: string;
+    readonly DECO2: string;
+    readonly DECO3: string;
+    readonly DECO4: string;
   };
-  LOGO: string;
+  readonly LOGO: string;
 };
 
 export const ONBOARDING_ASSETS = {

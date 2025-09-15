@@ -2,6 +2,7 @@ import { forwardRef, type ComponentPropsWithoutRef } from 'react';
 import type { FieldError } from 'react-hook-form';
 import { Label } from '@/shared/components/ui/label';
 import { Input } from '@/shared/components/ui/input';
+import { cn } from '@/shared/lib/utils';
 
 const DEFAULT_TEXTS = {
   LABEL: '이메일 인증번호',
@@ -40,6 +41,13 @@ export const EmailVerificationInput = forwardRef<HTMLInputElement, EmailVerifica
     },
     ref,
   ) => {
+    const describedBy = [
+      description && !error ? `${props.id}-description` : null,
+      error ? `${props.id}-error` : null,
+    ]
+      .filter(Boolean)
+      .join(' ');
+
     return (
       <div className={`space-y-2 ${containerClassName || ''}`}>
         <Label htmlFor={props.id} className={`font-medium text-white ${labelClassName || ''}`}>
@@ -52,7 +60,12 @@ export const EmailVerificationInput = forwardRef<HTMLInputElement, EmailVerifica
           autoComplete="one-time-code"
           inputMode="numeric"
           maxLength={6}
-          className={`border-white/20 bg-white/5 text-white placeholder:text-white/60 focus:border-white/40 focus:ring-white/20 ${inputClassName || ''}`}
+          pattern="[0-9]{6}"
+          aria-describedby={describedBy || undefined}
+          className={cn(
+            'border-white/20 bg-white/5 text-white placeholder:text-white/60 focus:border-white/40 focus:ring-white/20',
+            inputClassName,
+          )}
           {...props}
         />
         <div className="space-y-1">

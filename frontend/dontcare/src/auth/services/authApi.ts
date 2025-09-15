@@ -74,10 +74,8 @@ export const verifyTokenApi = async (data: VerifyTokenRequest): Promise<object> 
 export const loginApi = async (data: LoginRequest): Promise<TokenResponse> => {
   try {
     const response = await apiClient.post<TokenResponse>('/auth/login/', data);
-
     return response.data;
   } catch (error) {
-    console.error('Login API error:', error);
     throw handleApiError(error);
   }
 };

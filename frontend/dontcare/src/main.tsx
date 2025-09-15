@@ -1,11 +1,46 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
-import { createBrowserRouter, RouterProvider } from 'react-router-dom';
+import { createBrowserRouter, RouterProvider, type RouteObject } from 'react-router-dom';
 import '@/index.css';
 import { App } from '@/App';
 import { HydrateFallback } from '@/shared/components/HydrateFallback';
 import { QueryProvider } from '@/shared/components/QueryProvider';
-import { RouteErrorBoundary } from '@/shared/components/RouteErrorBoundary';
+import { AppErrorBoundary } from '@/shared/components/AppErrorBoundary';
+
+/**
+ * 라우트 생성 로직을 추상화하는 함수
+ * lazy loading과 공통 설정을 포함하여 중복을 제거합니다.
+ */
+function createLazyRoute(
+  path: string,
+  lazyImport: () => Promise<{ [key: string]: React.ComponentType }>,
+): RouteObject {
+  return {
+    path,
+    async lazy() {
+      const module = await lazyImport();
+      const Component = Object.values(module)[0]; // 첫 번째 export된 컴포넌트 사용
+      return { Component };
+    },
+  };
+}
+
+/**
+ * 인덱스 라우트 생성 함수
+ * index: true를 포함한 라우트를 생성합니다.
+ */
+function createIndexRoute(
+  lazyImport: () => Promise<{ [key: string]: React.ComponentType }>,
+): RouteObject {
+  return {
+    index: true,
+    async lazy() {
+      const module = await lazyImport();
+      const Component = Object.values(module)[0]; // 첫 번째 export된 컴포넌트 사용
+      return { Component };
+    },
+  };
+}
 
 const router = createBrowserRouter(
   [
@@ -13,56 +48,35 @@ const router = createBrowserRouter(
       path: '/',
       Component: App,
       HydrateFallback: HydrateFallback,
+      errorElement: <AppErrorBoundary />,
       children: [
         {
-          index: true,
-          async lazy() {
-            const { OnboardingPage } = await import('@/onboarding/OnboardingPage');
-            return { Component: OnboardingPage };
-          },
-          HydrateFallback: HydrateFallback,
-          errorElement: <RouteErrorBoundary />,
+          ...createIndexRoute(() => import('@/onboarding/OnboardingPage')),
         },
         {
-          path: '/login',
-          async lazy() {
-            const { LoginPage } = await import('@/auth/pages/LoginPage');
-            return { Component: LoginPage };
-          },
-          HydrateFallback: HydrateFallback,
-          errorElement: <RouteErrorBoundary />,
+          ...createLazyRoute('/login', () => import('@/auth/pages/LoginPage')),
         },
         {
-          path: '/signup',
-          async lazy() {
-            const { SignupPage } = await import('@/auth/pages/SignupPage');
-            return { Component: SignupPage };
-          },
-          HydrateFallback: HydrateFallback,
-          errorElement: <RouteErrorBoundary />,
+          ...createLazyRoute('/signup', () => import('@/auth/pages/SignupPage')),
         },
         {
-          path: '/password-reset',
-          async lazy() {
-            const { PasswordResetPage } = await import('@/auth/pages/PasswordResetPage');
-            return { Component: PasswordResetPage };
-          },
-          HydrateFallback: HydrateFallback,
-          errorElement: <RouteErrorBoundary />,
+          ...createLazyRoute('/password-reset', () => import('@/auth/pages/PasswordResetPage')),
         },
         {
-          path: '/home',
+          ...createLazyRoute('/home', () => import('@/home/HomePage')),
+        },
+        {
+          path: '*',
           async lazy() {
-            const { HomePage } = await import('@/home/HomePage');
-            return { Component: HomePage };
+            const { NotFoundPage } = await import('@/shared/pages/NotFoundPage');
+            return { Component: NotFoundPage };
           },
-          HydrateFallback: HydrateFallback,
-          errorElement: <RouteErrorBoundary />,
         },
       ],
     },
   ],
   {
+    basename: import.meta.env.BASE_URL,
     future: {
       v7_partialHydration: true,
     },

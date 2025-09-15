@@ -50,15 +50,32 @@ class TokenManager {
   isTokenValid(): boolean {
     const token = this.getAccessToken();
     if (!token) return false;
-
     try {
-      // JWT 토큰 디코딩하여 만료 시간 확인
-      const payload = JSON.parse(atob(token.split('.')[1]));
-      const currentTime = Math.floor(Date.now() / 1000);
-      return payload.exp > currentTime;
+      const payload = this._decodeJwtPayload(token);
+      if (!payload || typeof payload.exp !== 'number') return false;
+      const now = Math.floor(Date.now() / 1000);
+      const leewaySec = 30;
+      return payload.exp - leewaySec > now;
     } catch {
       return false;
     }
+  }
+
+  // SSR 폴백이 있는 base64url-safe JWT 페이로드 디코딩
+  private _decodeJwtPayload(token: string): Record<string, unknown> | null {
+    const parts = token.split('.');
+    if (parts.length < 2) return null;
+    let b64 = parts[1].replace(/-/g, '+').replace(/_/g, '/');
+    const pad = b64.length % 4;
+    if (pad) b64 += '='.repeat(4 - pad);
+    let json: string;
+    if (typeof globalThis.atob === 'function') {
+      json = globalThis.atob(b64);
+    } else {
+      // Node/SSR 폴백
+      json = Buffer.from(b64, 'base64').toString('utf8');
+    }
+    return JSON.parse(json);
   }
 
   /**
@@ -89,23 +106,23 @@ class TokenManager {
     const refreshToken = this.getRefreshToken();
 
     if (!refreshToken) {
-      throw new Error('No refresh token available');
+      throw new Error('리프레시 토큰을 사용할 수 없습니다');
     }
 
     try {
-      const response = await refreshTokenApi({ refresh: refreshToken });
+      const { access } = await refreshTokenApi({ refresh: refreshToken });
 
-      // 새로운 액세스 토큰으로 업데이트
-      useAuthStore.getState().setTokens(response.access, refreshToken);
+      // 새로운 액세스 토큰 반영 (리프레시 토큰은 기존 값 유지)
+      useAuthStore.getState().setTokens(access, refreshToken);
 
-      return response.access;
+      return access;
     } catch (error) {
       const apiError = error as ApiError;
 
       // 401 에러인 경우 리프레시 토큰도 만료된 것으로 간주
       if (apiError.status === 401) {
         this.clearTokens();
-        throw new Error('Refresh token expired. Please login again.');
+        throw new Error('리프레시 토큰이 만료되었습니다. 다시 로그인해주세요.');
       }
 
       // 재시도 가능한 에러인 경우 재시도
@@ -121,9 +138,10 @@ class TokenManager {
   /**
    * 재시도 가능한 에러인지 확인
    */
-  private _isRetryableError(error: ApiError): boolean {
-    const retryableStatuses = [408, 429, 500, 502, 503, 504];
-    return retryableStatuses.includes(error.status || 0);
+  private _isRetryableError(error: unknown): boolean {
+    const status = (error as ApiError)?.status;
+    if (status === undefined || status === 0) return true; // 네트워크/페치 에러
+    return [408, 429, 500, 502, 503, 504].includes(status);
   }
 
   /**
@@ -153,7 +171,7 @@ class TokenManager {
     try {
       return await this.refreshAccessToken();
     } catch (error) {
-      console.error('Failed to refresh token:', error);
+      console.error('토큰 갱신 실패:', error);
       this.clearTokens();
       return null;
     }

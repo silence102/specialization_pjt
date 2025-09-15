@@ -1,4 +1,4 @@
-import { forwardRef, type ComponentPropsWithoutRef } from 'react';
+import { forwardRef, type ComponentPropsWithoutRef, useId } from 'react';
 import type { FieldError } from 'react-hook-form';
 import { Label } from '@/shared/components/ui/label';
 import { Input } from '@/shared/components/ui/input';
@@ -31,6 +31,8 @@ export const EmailInput = forwardRef<HTMLInputElement, EmailInputProps>(
       error,
       description,
       persistentDescription,
+      id,
+      className,
       labelClassName,
       inputClassName,
       errorClassName,
@@ -40,24 +42,33 @@ export const EmailInput = forwardRef<HTMLInputElement, EmailInputProps>(
     },
     ref,
   ) => {
+    const reactId = useId();
+    const inputId = id ?? reactId;
+    const showDescription = Boolean(description && (persistentDescription || !error));
+    const descId = showDescription ? `${inputId}-desc` : undefined;
+    const errId = error ? `${inputId}-err` : undefined;
+
     return (
       <div className={`space-y-2 ${containerClassName || ''}`}>
-        <Label htmlFor={props.id} className={`font-medium text-white ${labelClassName || ''}`}>
+        <Label htmlFor={inputId} className={`font-medium text-white ${labelClassName || ''}`}>
           {label}
         </Label>
         <Input
           ref={ref}
           {...props}
+          id={inputId}
           type="email"
           autoComplete="email"
           inputMode="email"
           placeholder={placeholder}
-          className={`border-white/20 bg-white/5 text-white placeholder:text-white/60 focus:border-white/40 focus:ring-white/20 ${inputClassName || ''}`}
+          aria-invalid={!!error}
+          aria-describedby={[descId, errId].filter(Boolean).join(' ') || undefined}
+          className={`border-white/20 bg-white/5 text-white placeholder:text-white/60 focus:border-white/40 focus:ring-white/20 ${className || ''} ${inputClassName || ''}`}
         />
         <div className="space-y-1">
           {/* description - 항상 표시 (persistentDescription이 true인 경우) */}
-          {description && (persistentDescription || !error) && (
-            <div className={`text-sm text-white/80 ${descriptionClassName || ''}`}>
+          {showDescription && (
+            <div id={descId} className={`text-sm text-white/80 ${descriptionClassName || ''}`}>
               {Array.isArray(description) ? (
                 <ul className="list-inside list-disc space-y-1">
                   {description.map((item, index) => (
@@ -72,7 +83,9 @@ export const EmailInput = forwardRef<HTMLInputElement, EmailInputProps>(
           {/* 에러메시지 영역 - 미리 확보 */}
           <div className="min-h-[1.25rem]">
             {error && (
-              <p className={`text-sm text-red-400 ${errorClassName || ''}`}>{error.message}</p>
+              <p id={errId} className={`text-sm text-red-400 ${errorClassName || ''}`}>
+                {error.message}
+              </p>
             )}
           </div>
         </div>

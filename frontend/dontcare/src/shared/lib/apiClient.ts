@@ -17,6 +17,13 @@ interface CustomAxiosRequestConfig extends InternalAxiosRequestConfig {
 }
 
 /**
+ * 취소 가능한 요청 설정 타입
+ */
+export interface CancellableRequestConfig extends AxiosRequestConfig {
+  signal?: AbortSignal;
+}
+
+/**
  * API 에러 응답 타입
  */
 interface ApiErrorResponse {
@@ -106,7 +113,8 @@ const shouldRetry = (error: AxiosError): boolean => {
  */
 const executeWithRetry = async <T>(requestFn: () => Promise<T>, retryCount = 0): Promise<T> => {
   try {
-    return await requestFn();
+    const result = await requestFn();
+    return result;
   } catch (error) {
     const axiosError = error as AxiosError;
 
@@ -150,6 +158,15 @@ axiosInstance.interceptors.request.use(
       const token = await getValidAccessToken();
       if (token) {
         config.headers.Authorization = `Bearer ${token}`;
+      }
+    }
+
+    // 상태 변경 요청에 CSRF 토큰 추가
+    const stateChangingMethods = ['post', 'put', 'patch', 'delete'];
+    if (config.method && stateChangingMethods.includes(config.method.toLowerCase())) {
+      const csrfToken = document.querySelector<HTMLMetaElement>('meta[name="csrf-token"]')?.content;
+      if (csrfToken) {
+        config.headers['X-CSRF-Token'] = csrfToken;
       }
     }
 
@@ -235,14 +252,44 @@ axiosInstance.interceptors.response.use(
 );
 
 /**
+ * 취소 가능한 요청을 위한 유틸리티 함수
+ */
+const createCancellableRequest = <T>(
+  requestFn: (signal?: AbortSignal) => Promise<T>,
+  signal?: AbortSignal,
+): Promise<T> => {
+  if (!signal) {
+    return executeWithRetry(() => requestFn());
+  }
+
+  return new Promise((resolve, reject) => {
+    const abortHandler = () => {
+      reject(new Error('Request was cancelled'));
+    };
+
+    signal.addEventListener('abort', abortHandler, { once: true });
+
+    executeWithRetry(() => requestFn(signal))
+      .then(resolve)
+      .catch(reject)
+      .finally(() => {
+        signal.removeEventListener('abort', abortHandler);
+      });
+  });
+};
+
+/**
  * API 클라이언트 래퍼 함수들
  */
 export const apiClient = {
   /**
    * GET 요청
    */
-  get: <T = unknown>(url: string, config?: AxiosRequestConfig): Promise<AxiosResponse<T>> =>
-    executeWithRetry(() => axiosInstance.get<T>(url, config)),
+  get: <T = unknown>(url: string, config?: CancellableRequestConfig): Promise<AxiosResponse<T>> =>
+    createCancellableRequest(
+      (signal) => axiosInstance.get<T>(url, { ...config, signal }),
+      config?.signal,
+    ),
 
   /**
    * POST 요청
@@ -250,8 +297,12 @@ export const apiClient = {
   post: <T = unknown>(
     url: string,
     data?: unknown,
-    config?: AxiosRequestConfig,
-  ): Promise<AxiosResponse<T>> => executeWithRetry(() => axiosInstance.post<T>(url, data, config)),
+    config?: CancellableRequestConfig,
+  ): Promise<AxiosResponse<T>> =>
+    createCancellableRequest(
+      (signal) => axiosInstance.post<T>(url, data, { ...config, signal }),
+      config?.signal,
+    ),
 
   /**
    * PUT 요청
@@ -259,8 +310,12 @@ export const apiClient = {
   put: <T = unknown>(
     url: string,
     data?: unknown,
-    config?: AxiosRequestConfig,
-  ): Promise<AxiosResponse<T>> => executeWithRetry(() => axiosInstance.put<T>(url, data, config)),
+    config?: CancellableRequestConfig,
+  ): Promise<AxiosResponse<T>> =>
+    createCancellableRequest(
+      (signal) => axiosInstance.put<T>(url, data, { ...config, signal }),
+      config?.signal,
+    ),
 
   /**
    * PATCH 요청
@@ -268,14 +323,24 @@ export const apiClient = {
   patch: <T = unknown>(
     url: string,
     data?: unknown,
-    config?: AxiosRequestConfig,
-  ): Promise<AxiosResponse<T>> => executeWithRetry(() => axiosInstance.patch<T>(url, data, config)),
+    config?: CancellableRequestConfig,
+  ): Promise<AxiosResponse<T>> =>
+    createCancellableRequest(
+      (signal) => axiosInstance.patch<T>(url, data, { ...config, signal }),
+      config?.signal,
+    ),
 
   /**
    * DELETE 요청
    */
-  delete: <T = unknown>(url: string, config?: AxiosRequestConfig): Promise<AxiosResponse<T>> =>
-    executeWithRetry(() => axiosInstance.delete<T>(url, config)),
+  delete: <T = unknown>(
+    url: string,
+    config?: CancellableRequestConfig,
+  ): Promise<AxiosResponse<T>> =>
+    createCancellableRequest(
+      (signal) => axiosInstance.delete<T>(url, { ...config, signal }),
+      config?.signal,
+    ),
 
   /**
    * 원본 axios 인스턴스 접근 (고급 사용)
@@ -303,6 +368,26 @@ export const handleApiError = (error: unknown): ApiError => {
     message: error instanceof Error ? error.message : 'Unknown error occurred',
   };
 };
+
+/**
+ * 사용 예시:
+ *
+ * // 기본 사용법 (기존 코드와 호환)
+ * const response = await apiClient.get('/api/users');
+ *
+ * // AbortController를 사용한 취소 가능한 요청
+ * const controller = new AbortController();
+ * const response = await apiClient.get('/api/users', {
+ *   signal: controller.signal
+ * });
+ *
+ * // 컴포넌트에서 useAbortController 훅 사용
+ * const { signal } = useAbortController();
+ * const response = await apiClient.get('/api/users', { signal });
+ *
+ * // 요청 취소
+ * controller.abort();
+ */
 
 /**
  * 기본 내보내기 (하위 호환성을 위해 유지)

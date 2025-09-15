@@ -22,47 +22,43 @@
 2. 설치 프로그램을 실행하고, 기본 설정값으로 설치를 진행합니다.
 3. 설치 완료 후, 터미널(Git Bash 또는 Command Prompt)에서 아래 명령어로 설치를 확인합니다.
 
-    ```bash
-    git --version
-    ```
+   ```bash
+   git --version
+   ```
 
 #### Node.js 및 pnpm 설치 (nvm-windows 사용)
 
 `nvm(Node Version Manager)`을 사용하면 여러 Node.js 버전을 쉽게 전환하며 관리할 수 있습니다.
 
 1. **nvm-windows 설치**
-    - [nvm-windows 최신 릴리스 페이지](https://github.com/coreybutler/nvm-windows/releases)에 접속합니다.
-    - `nvm-setup.exe` 파일을 다운로드하여 실행합니다.
-    - 설치 경로 등을 설정하고 설치를 완료합니다.
+   - [nvm-windows 최신 릴리스 페이지](https://github.com/coreybutler/nvm-windows/releases)에 접속합니다.
+   - `nvm-setup.exe` 파일을 다운로드하여 실행합니다.
+   - 설치 경로 등을 설정하고 설치를 완료합니다.
 
 2. **Node.js 설치 및 적용**
-    - 새로운 터미널을 열고, 아래 명령어를 실행하여 프로젝트에서 사용할 Node.js 버전을 설치합니다.
+   - 새로운 터미널을 열고, 아래 명령어를 실행하여 프로젝트에서 사용할 Node.js 버전을 설치합니다.
 
-      ```bash
-      nvm install 22.17.1
-      ```
+     ```bash
+     nvm install 22.17.1
+     ```
 
-    - 설치된 버전을 사용하도록 설정합니다.
+   - 설치된 버전을 사용하도록 설정합니다.
 
-      ```bash
-      nvm use 22.17.1
-      ```
+     ```bash
+     nvm use 22.17.1
+     ```
 
 3. **pnpm 설치**
-    - Node.js가 설치된 환경에서 아래 명령어로 `pnpm`을 전역으로 설치합니다.
-
-      ```bash
-      npm install -g pnpm
-      ```
+   - Node.js가 설치된 환경에서 아래 명령어로 `pnpm`을 전역으로 설치합니다.
 
 4. **설치 확인**
-    - 모든 도구가 올바르게 설치되었는지 아래 명령어로 버전을 확인합니다.
+   - 모든 도구가 올바르게 설치되었는지 아래 명령어로 버전을 확인합니다.
 
-      ```bash
-      node --version # v22.17.1
-      pnpm --version # v10.15.1
-      git --version
-      ```
+     ```bash
+     node --version # v22.17.1
+     pnpm --version # v10.15.1
+     git --version
+     ```
 
 ---
 

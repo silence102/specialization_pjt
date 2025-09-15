@@ -1,4 +1,4 @@
-import { forwardRef, type ComponentPropsWithoutRef } from 'react';
+import { forwardRef, type ComponentPropsWithoutRef, useId } from 'react';
 import type { FieldError } from 'react-hook-form';
 import { Label } from '@/shared/components/ui/label';
 import { Input } from '@/shared/components/ui/input';
@@ -49,14 +49,18 @@ export const EmailInputWithButton = forwardRef<HTMLInputElement, EmailInputWithB
     },
     ref,
   ) => {
+    const generatedId = useId();
+    const inputId = props.id || generatedId;
+
     return (
       <div className={`space-y-2 ${containerClassName || ''}`}>
-        <Label htmlFor={props.id} className={`font-medium text-white ${labelClassName || ''}`}>
+        <Label htmlFor={inputId} className={`font-medium text-white ${labelClassName || ''}`}>
           {label}
         </Label>
         <div className="flex gap-2">
           <Input
             ref={ref}
+            id={inputId}
             type="email"
             placeholder={placeholder}
             autoComplete="email"

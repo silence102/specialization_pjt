@@ -30,7 +30,7 @@ export function LoginForm() {
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
     mode: 'onChange',
-    reValidateMode: 'onChange',
+    reValidateMode: 'onBlur',
     criteriaMode: 'firstError',
     shouldFocusError: true,
     delayError: 500,

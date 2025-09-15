@@ -8,15 +8,17 @@ import globals from 'globals';
 
 export default [
   // Ignore dist folder and other build outputs
-  { ignores: ['dist/**', 'node_modules/**', '*.config.*'] },
+  { ignores: ['dist/**', 'node_modules/**', '*.config.*', '.prettierrc.cjs'] },
   // TanStack Query ESLint plugin configuration for JS/JSX
   {
     files: ['**/*.{js,cjs,mjs,jsx}'],
     languageOptions: {
       ecmaVersion: 'latest',
       sourceType: 'module',
-      ecmaFeatures: { jsx: true },
       globals: { ...globals.browser },
+      parserOptions: {
+        ecmaFeatures: { jsx: true },
+      },
     },
     plugins: {
       react,
@@ -33,8 +35,7 @@ export default [
     },
     settings: { react: { version: 'detect' } },
   },
-  // Limit base JS rules to JS/JSX only
-  { files: ['**/*.{js,cjs,mjs,jsx}'], ...js.configs.recommended },
+
   {
     files: ['**/*.ts', '**/*.tsx'],
     languageOptions: {

@@ -1,3 +1,10 @@
+const FEATURES: ReadonlyArray<{ title: string; desc: string }> = [
+  { title: '시그널 에이전트', desc: '관심 종목의 추세·뉴스·거래대금을 종합하여 타이밍을 포착.' },
+  { title: '리스크 가드', desc: '급락·변동성 확대를 조기 감지하고 규칙 기반 알림 제공.' },
+  { title: '포트폴리오 코치', desc: '수익/손실 드라이버를 분석하고 리밸런싱 아이디어 제안.' },
+  { title: '리서치 요약', desc: '긴 리포트와 공시를 한 번에 핵심만 요약.' },
+];
+
 export function ServiceIntro() {
   return (
     <section className="relative z-10">
@@ -19,19 +26,9 @@ export function ServiceIntro() {
 
           {/* Right: Large feature cards */}
           <div className="grid gap-6 sm:grid-cols-2">
-            <Card
-              title="시그널 에이전트"
-              desc="관심 종목의 추세·뉴스·거래대금을 종합하여 타이밍을 포착."
-            />
-            <Card
-              title="리스크 가드"
-              desc="급락·변동성 확대를 조기 감지하고 규칙 기반 알림 제공."
-            />
-            <Card
-              title="포트폴리오 코치"
-              desc="수익/손실 드라이버를 분석하고 리밸런싱 아이디어 제안."
-            />
-            <Card title="리서치 요약" desc="긴 리포트와 공시를 한 번에 핵심만 요약." />
+            {FEATURES.map((f) => (
+              <Card key={f.title} title={f.title} desc={f.desc} />
+            ))}
           </div>
         </div>
       </div>

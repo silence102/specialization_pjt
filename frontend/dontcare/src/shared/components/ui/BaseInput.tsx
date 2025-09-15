@@ -67,15 +67,15 @@ export const BaseInput = forwardRef<HTMLInputElement, BaseInputProps>(
           </Label>
         )}
         <Input
+          ref={ref}
+          {...props}
           id={id}
           type={type}
           placeholder={placeholder}
-          ref={ref}
           aria-invalid={ariaInvalid}
           aria-describedby={mergedDescribedBy}
           aria-errormessage={error?.message ? errorId : undefined}
           className={cn('placeholder:text-xs placeholder:text-muted-foreground/70', inputClassName)}
-          {...props}
         />
         <div className="min-h-[1rem] space-y-1 pl-1">
           {description && (persistentDescription || !error?.message) && (
@@ -101,8 +101,8 @@ export const BaseInput = forwardRef<HTMLInputElement, BaseInputProps>(
           )}
           <p
             id={errorId}
-            role="alert"
-            aria-live="assertive"
+            role={error?.message ? 'alert' : undefined}
+            aria-live={error?.message ? 'assertive' : undefined}
             className={cn(
               'text-sm font-medium text-destructive transition-opacity duration-200',
               error?.message ? 'opacity-100' : 'opacity-0',

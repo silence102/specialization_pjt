@@ -1,6 +1,5 @@
 import { Outlet } from 'react-router-dom';
 import { Layout } from '@/shared/components/Layout';
-import { ErrorBoundary } from '@/shared/components/ErrorBoundary';
 import { useTokenRefresh } from '@/auth/hooks/useTokenRefresh';
 
 function App() {
@@ -8,11 +7,9 @@ function App() {
   useTokenRefresh();
 
   return (
-    <ErrorBoundary>
-      <Layout>
-        <Outlet />
-      </Layout>
-    </ErrorBoundary>
+    <Layout>
+      <Outlet />
+    </Layout>
   );
 }
 

@@ -9,10 +9,10 @@ import {
 } from '@/shared/components/ui/card';
 
 /**
- * RouteErrorBoundary 컴포넌트
+ * AppErrorBoundary 컴포넌트
  *
- * 라우트 레벨에서 발생하는 에러를 처리하는 ErrorBoundary입니다.
- * lazy loading 실패, 컴포넌트 로딩 에러 등을 graceful하게 처리합니다.
+ * 애플리케이션 레벨에서 발생하는 에러를 처리하는 ErrorBoundary입니다.
+ * 라우트 로딩 실패, 컴포넌트 렌더링 에러 등을 graceful하게 처리합니다.
  *
  * ## 주요 역할
  * - lazy loading 중 발생하는 import 실패 처리
@@ -21,35 +21,23 @@ import {
  * - 페이지 새로고침을 통한 복구 기능 제공
  *
  * ## 사용 사례
- * - React Router의 lazy-loaded routes에서 errorElement로 사용
+ * - React Router의 상위 라우트에서 errorElement로 사용
  * - 네트워크 문제로 인한 chunk 로딩 실패 처리
  * - 컴포넌트 import 실패 시 fallback UI 제공
  *
  * ## 주의사항
  * - 이벤트 핸들러, 비동기 코드, 서버 사이드 렌더링 에러는 catch하지 못함
  * - Error Boundary는 클래스 컴포넌트로만 구현 가능
- * - 라우트별로 독립적인 에러 처리를 위해 각 라우트에 개별적으로 적용
- *
- * ## 사용 예시
- * ```tsx
- * {
- *   path: '/login',
- *   async lazy() {
- *     const { LoginPage } = await import('@/auth/pages/LoginPage');
- *     return { Component: LoginPage };
- *   },
- *   errorElement: <RouteErrorBoundary />,
- * }
- * ```
+ * - 상위 레벨에서 일괄적인 에러 처리를 위해 사용
  */
 
-interface RouteErrorBoundaryState {
+interface AppErrorBoundaryState {
   hasError: boolean;
   error?: Error;
   errorInfo?: ErrorInfo;
 }
 
-interface RouteErrorBoundaryProps {
+interface AppErrorBoundaryProps {
   /** 에러를 catch할 자식 컴포넌트들 */
   children?: ReactNode;
   /** 에러 발생 시 표시할 커스텀 fallback UI (기본 에러 UI 대신 사용) */
@@ -60,16 +48,13 @@ interface RouteErrorBoundaryProps {
 
 const toError = (e: unknown): Error => (e instanceof Error ? e : new Error(String(e)));
 
-export class RouteErrorBoundary extends Component<
-  RouteErrorBoundaryProps,
-  RouteErrorBoundaryState
-> {
-  constructor(props: RouteErrorBoundaryProps) {
+export class AppErrorBoundary extends Component<AppErrorBoundaryProps, AppErrorBoundaryState> {
+  constructor(props: AppErrorBoundaryProps) {
     super(props);
     this.state = { hasError: false };
   }
 
-  static getDerivedStateFromError(error: unknown): RouteErrorBoundaryState {
+  static getDerivedStateFromError(error: unknown): AppErrorBoundaryState {
     return { hasError: true, error: toError(error) };
   }
 
@@ -78,7 +63,7 @@ export class RouteErrorBoundary extends Component<
 
     // 에러 로깅 (개발 환경에서만)
     if (process.env.NODE_ENV === 'development') {
-      console.error('Route error caught by boundary:', normalized, errorInfo);
+      console.error('App error caught by boundary:', normalized, errorInfo);
     }
 
     // 외부 에러 리포팅 서비스에 전송 (예: Sentry)

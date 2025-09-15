@@ -1,4 +1,4 @@
-import { useEffect, useCallback } from 'react';
+import { useEffect, useCallback, useRef } from 'react';
 import { useAuthStore } from '@/auth/stores/authStore';
 import { tokenManager } from '@/auth/utils/tokenManager';
 
@@ -12,6 +12,9 @@ import { tokenManager } from '@/auth/utils/tokenManager';
  */
 export const useTokenRefresh = () => {
   const { isAuthenticated, getAccessToken } = useAuthStore();
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
+  const refreshTokenRef = useRef<(() => Promise<void>) | null>(null);
+  const setupRefreshTimerRef = useRef<(() => void) | null>(null);
 
   /**
    * 토큰 갱신 수행
@@ -23,6 +26,8 @@ export const useTokenRefresh = () => {
 
     try {
       await tokenManager.refreshAccessToken();
+      // 새로운 토큰을 기반으로 재스케줄링
+      setupRefreshTimerRef.current?.();
     } catch (error) {
       console.error('Token refresh failed:', error);
       // 토큰 갱신 실패 시 로그아웃 처리
@@ -60,35 +65,51 @@ export const useTokenRefresh = () => {
    */
   const setupRefreshTimer = useCallback(() => {
     const accessToken = getAccessToken();
-    if (!accessToken) {
-      return;
-    }
+    if (!accessToken) return;
 
     const nextRefreshTime = getNextRefreshTime(accessToken);
     const timeUntilRefresh = nextRefreshTime - Date.now();
 
-    if (timeUntilRefresh > 0) {
-      const timer = setTimeout(() => {
-        refreshToken();
-      }, timeUntilRefresh);
+    // 새로운 타이머를 설정하기 전에 기존 타이머 정리
+    if (timerRef.current) {
+      clearTimeout(timerRef.current);
+      timerRef.current = null;
+    }
 
-      return () => clearTimeout(timer);
+    if (timeUntilRefresh > 0) {
+      // 브라우저 최대 지연 시간으로 제한 (~24.8일)
+      const delay = Math.min(timeUntilRefresh, 2_147_483_647);
+      timerRef.current = setTimeout(() => {
+        refreshTokenRef.current?.();
+      }, delay);
     } else {
       // 이미 만료되었거나 곧 만료될 예정인 경우 즉시 갱신
-      refreshToken();
+      refreshTokenRef.current?.();
     }
-  }, [getAccessToken, getNextRefreshTime, refreshToken]);
+  }, [getAccessToken, getNextRefreshTime]);
 
   /**
    * 컴포넌트 마운트 시 토큰 상태 확인 및 갱신 타이머 설정
    */
+  // 함수 참조 설정
+  refreshTokenRef.current = refreshToken;
+  setupRefreshTimerRef.current = setupRefreshTimer;
+
   useEffect(() => {
     if (!isAuthenticated) {
+      if (timerRef.current) {
+        clearTimeout(timerRef.current);
+        timerRef.current = null;
+      }
       return;
     }
-
-    const cleanup = setupRefreshTimer();
-    return cleanup;
+    setupRefreshTimer();
+    return () => {
+      if (timerRef.current) {
+        clearTimeout(timerRef.current);
+        timerRef.current = null;
+      }
+    };
   }, [isAuthenticated, setupRefreshTimer]);
 
   /**
@@ -99,8 +120,12 @@ export const useTokenRefresh = () => {
       if (document.visibilityState === 'visible' && isAuthenticated) {
         // 페이지가 다시 보이게 되었을 때 토큰 유효성 확인
         const accessToken = getAccessToken();
-        if (accessToken && !tokenManager.isTokenValid()) {
-          refreshToken();
+        if (!accessToken) return;
+        if (!tokenManager.isTokenValid()) {
+          refreshTokenRef.current?.();
+        } else {
+          // 탭이 일시 중단되었을 때 타이머를 다시 설정
+          setupRefreshTimerRef.current?.();
         }
       }
     };
@@ -109,7 +134,7 @@ export const useTokenRefresh = () => {
     return () => {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
-  }, [isAuthenticated, getAccessToken, refreshToken]);
+  }, [isAuthenticated, getAccessToken]);
 
   return {
     refreshToken,

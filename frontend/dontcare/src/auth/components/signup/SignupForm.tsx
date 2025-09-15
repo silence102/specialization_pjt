@@ -15,6 +15,7 @@ import { EmailVerificationInput } from '@/auth/components/inputs/EmailVerificati
 import { NameInput } from '@/auth/components/inputs/NameInput';
 import { PasswordInput } from '@/auth/components/inputs/PasswordInput';
 import { ConfirmPasswordInput } from '@/auth/components/inputs/ConfirmPasswordInput';
+import { useFormField } from '@/shared/hooks/useFormField';
 
 const UI_TEXTS = {
   TITLE: '회원가입',
@@ -47,9 +48,19 @@ export const SignupForm = () => {
     formState: { errors },
   } = form;
 
-  const onSubmit = (data: SignupFormValues): void => {
+  // 폼 필드 설정
+  const emailField = useFormField('email', control, errors.email);
+  const emailVerificationField = useFormField(
+    'emailVerification',
+    control,
+    errors.emailVerification,
+  );
+  const nameField = useFormField('name', control, errors.name);
+  const passwordField = useFormField('password', control, errors.password);
+  const confirmPasswordField = useFormField('confirmPassword', control, errors.confirmPassword);
+
+  const onSubmit = (): void => {
     // 회원가입 로직을 여기에 구현하세요
-    console.log('Signup form submitted:', data);
   };
 
   return (
@@ -67,32 +78,27 @@ export const SignupForm = () => {
           {/* 입력 필드 섹션 */}
           <div className="space-y-1">
             <Controller
-              name="email"
-              control={control}
-              render={({ field }) => <EmailInput {...field} error={errors.email} />}
+              {...emailField.controllerProps}
+              render={({ field }) => <EmailInput {...field} error={emailField.error} />}
             />
             <Controller
-              name="emailVerification"
-              control={control}
+              {...emailVerificationField.controllerProps}
               render={({ field }) => (
-                <EmailVerificationInput {...field} error={errors.emailVerification} />
+                <EmailVerificationInput {...field} error={emailVerificationField.error} />
               )}
             />
             <Controller
-              name="name"
-              control={control}
-              render={({ field }) => <NameInput {...field} error={errors.name} />}
+              {...nameField.controllerProps}
+              render={({ field }) => <NameInput {...field} error={nameField.error} />}
             />
             <Controller
-              name="password"
-              control={control}
-              render={({ field }) => <PasswordInput {...field} error={errors.password} />}
+              {...passwordField.controllerProps}
+              render={({ field }) => <PasswordInput {...field} error={passwordField.error} />}
             />
             <Controller
-              name="confirmPassword"
-              control={control}
+              {...confirmPasswordField.controllerProps}
               render={({ field }) => (
-                <ConfirmPasswordInput {...field} error={errors.confirmPassword} />
+                <ConfirmPasswordInput {...field} error={confirmPasswordField.error} />
               )}
             />
           </div>

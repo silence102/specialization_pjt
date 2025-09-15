@@ -5,7 +5,7 @@ declare module '*.css';
 
 // CSS 모듈 타입 선언 (scoped styles)
 declare module '*.module.css' {
-  const classes: Record<string, string>;
+  const classes: { readonly [key: string]: string };
   export default classes;
 }
 
@@ -13,7 +13,7 @@ declare module '*.module.css' {
 declare module '*.scss';
 
 declare module '*.module.scss' {
-  const classes: Record<string, string>;
+  const classes: { readonly [key: string]: string };
   export default classes;
 }
 

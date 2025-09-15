@@ -69,14 +69,12 @@ export const PasswordResetForm = () => {
 
   const handleStep1Submit = (data: PasswordResetStep1Values): void => {
     // 1단계 로직을 여기에 구현하세요
-    console.log('Step 1 submitted:', data);
     setStep1Data(data);
     setCurrentStep(2);
   };
 
-  const handleStep2Submit = (data: PasswordResetStep2Values): void => {
+  const handleStep2Submit = (): void => {
     // 2단계 로직을 여기에 구현하세요
-    console.log('Step 2 submitted:', { ...step1Data, ...data });
   };
 
   const handleBackToStep1 = () => {
@@ -85,7 +83,6 @@ export const PasswordResetForm = () => {
 
   const handleResendVerificationCode = () => {
     // 인증번호 재전송 로직을 여기에 구현하세요
-    console.log('Resend verification code for:', step1Data?.email);
   };
 
   return (

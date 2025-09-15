@@ -109,7 +109,7 @@
   }
   .btn-cta-primary {
     /* Glassy pill-like button for hero */
-    @apply btn-cta border-white/20 bg-white/5 text-white/95 shadow-soft-2xl backdrop-blur-md hover:bg-white/10 active:scale-[.98];
+    @apply btn-cta border-white/20 bg-white/5 text-white/95 shadow-2xl backdrop-blur-md hover:bg-white/10 active:scale-[.98];
   }
 
   .divider-line {

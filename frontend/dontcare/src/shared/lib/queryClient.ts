@@ -25,8 +25,23 @@ const defaultOptions = {
     refetchOnMount: true,
   },
   mutations: {
-    // 뮤테이션 재시도 횟수
-    retry: 1,
+    // 뮤테이션 재시도 로직 - 500번대 서버 에러에만 재시도
+    retry: (failureCount: number, error: unknown) => {
+      // Axios 에러인지 확인
+      if (error && typeof error === 'object' && 'response' in error) {
+        const axiosError = error as { response?: { status?: number } };
+        const status = axiosError.response?.status;
+
+        // 500번대 서버 에러인 경우에만 재시도 (최대 1회)
+        if (status && status >= 500 && status < 600) {
+          // 첫 실패 시 failureCount === 1 -> 1회 재시도 허용
+          return failureCount < 2; // 1회까지만 재시도
+        }
+      }
+
+      // 400번대 클라이언트 에러나 기타 에러는 재시도하지 않음
+      return false;
+    },
   },
 } as const;
 

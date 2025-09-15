@@ -64,14 +64,15 @@ export type LoginFormValues = z.infer<typeof loginSchema>;
 // 회원가입용 스키마들
 export const nameSchema = z
   .string()
+  .trim()
   .min(1, { message: ERROR_MESSAGES.NAME_REQUIRED })
   .min(2, { message: ERROR_MESSAGES.NAME_TOO_SHORT })
   .max(50, { message: ERROR_MESSAGES.NAME_TOO_LONG })
-  .regex(/^[가-힣\s]+$/, { message: ERROR_MESSAGES.NAME_INVALID })
-  .transform((val) => val.trim());
+  .regex(/^[가-힣\s]+$/, { message: ERROR_MESSAGES.NAME_INVALID });
 
 export const emailVerificationSchema = z
   .string()
+  .trim()
   .min(1, { message: ERROR_MESSAGES.EMAIL_VERIFICATION_REQUIRED })
   .regex(/^\d{6}$/, { message: ERROR_MESSAGES.EMAIL_VERIFICATION_INVALID });
 

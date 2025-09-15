@@ -11,19 +11,23 @@ interface AuthState {
   // 액션
   login: (tokens: TokenResponse, user: User) => void;
   logout: () => void;
-  setUser: (user: User) => void;
+  setUser: (user: User | null) => void;
   setTokens: (accessToken: string, refreshToken: string) => void;
   clearAuth: () => void;
   getAccessToken: () => string | null;
   getRefreshToken: () => string | null;
 }
 
-export const useAuthStore = create<AuthState>((set, get) => ({
-  // 초기 상태
+const initialState: Pick<AuthState, 'isAuthenticated' | 'user' | 'accessToken' | 'refreshToken'> = {
   isAuthenticated: false,
   user: null,
   accessToken: null,
   refreshToken: null,
+};
+
+export const useAuthStore = create<AuthState>((set, get) => ({
+  // 초기 상태
+  ...initialState,
 
   // 액션들
   login: (tokens, user) => {
@@ -35,14 +39,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     });
   },
 
-  logout: () => {
-    set({
-      isAuthenticated: false,
-      accessToken: null,
-      refreshToken: null,
-      user: null,
-    });
-  },
+  logout: () => get().clearAuth(),
 
   setUser: (user) => {
     set({ user });
@@ -52,18 +49,11 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     set({
       accessToken,
       refreshToken,
-      isAuthenticated: true,
+      isAuthenticated: Boolean(accessToken),
     });
   },
 
-  clearAuth: () => {
-    set({
-      isAuthenticated: false,
-      accessToken: null,
-      refreshToken: null,
-      user: null,
-    });
-  },
+  clearAuth: () => set(() => ({ ...initialState })),
 
   getAccessToken: () => {
     return get().accessToken;

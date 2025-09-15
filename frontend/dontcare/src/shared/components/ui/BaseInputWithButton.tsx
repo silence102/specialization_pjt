@@ -75,7 +75,7 @@ export const BaseInputWithButton = forwardRef<HTMLInputElement, BaseInputWithBut
       <div
         className={cn(
           'space-y-1.5',
-          show ? 'max-h-32 opacity-100' : 'max-h-0 opacity-0',
+          show ? 'opacity-100' : 'max-h-0 opacity-0',
           'overflow-hidden transition-all duration-300 ease-in-out',
           containerClassName,
           className,
@@ -114,7 +114,7 @@ export const BaseInputWithButton = forwardRef<HTMLInputElement, BaseInputWithBut
             onClick={onButtonClick}
             className="absolute right-1 top-1/2 h-7 -translate-y-1/2 px-3 text-xs"
           >
-            {buttonText}
+            {buttonLoading ? 'Loading...' : buttonText}
           </Button>
         </div>
         <div className="min-h-[1rem] space-y-1 pl-1">
@@ -124,7 +124,7 @@ export const BaseInputWithButton = forwardRef<HTMLInputElement, BaseInputWithBut
                 <ul className="space-y-0.5">
                   {description.map((item, index) => (
                     <li
-                      key={index}
+                      key={`${id}-desc-${index}-${item}`}
                       className="flex items-center gap-2 text-xs text-muted-foreground"
                     >
                       <span className="flex h-1.5 w-1.5 items-center justify-center">

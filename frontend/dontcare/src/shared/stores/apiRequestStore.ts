@@ -17,7 +17,7 @@ interface ApiRequestState {
     string,
     {
       id: string;
-      type: string;
+      type: ApiRequestType;
       startTime: number;
       isPending: boolean;
     }
@@ -26,13 +26,13 @@ interface ApiRequestState {
 
 interface ApiRequestActions {
   /** API 요청 시작 */
-  startRequest: (id: string, type: string) => void;
+  startRequest: (id: string, type: ApiRequestType) => void;
   /** API 요청 완료 */
   completeRequest: (id: string) => void;
   /** 특정 요청이 진행 중인지 확인 */
   isRequestPending: (id: string) => boolean;
   /** 특정 타입의 요청이 진행 중인지 확인 */
-  isTypePending: (type: string) => boolean;
+  isTypePending: (type: ApiRequestType) => boolean;
   /** 모든 요청 초기화 */
   clearAllRequests: () => void;
   /** 특정 요청 제거 */
@@ -41,15 +41,15 @@ interface ApiRequestActions {
 
 type ApiRequestStore = ApiRequestState & ApiRequestActions;
 
-const initialState: ApiRequestState = {
-  pendingRequests: new Set(),
+const getInitialState = (): ApiRequestState => ({
+  pendingRequests: new Set<string>(),
   requestDetails: {},
-};
+});
 
 export const useApiRequestStore = create<ApiRequestStore>()((set, get) => ({
-  ...initialState,
+  ...getInitialState(),
 
-  startRequest: (id: string, type: string) => {
+  startRequest: (id: string, type: ApiRequestType) => {
     set((state) => ({
       pendingRequests: new Set([...state.pendingRequests, id]),
       requestDetails: {
@@ -88,13 +88,13 @@ export const useApiRequestStore = create<ApiRequestStore>()((set, get) => ({
     return get().pendingRequests.has(id);
   },
 
-  isTypePending: (type: string) => {
+  isTypePending: (type: ApiRequestType) => {
     const { requestDetails } = get();
     return Object.values(requestDetails).some((detail) => detail.type === type && detail.isPending);
   },
 
   clearAllRequests: () => {
-    set(initialState);
+    set(getInitialState());
   },
 
   removeRequest: (id: string) => {
