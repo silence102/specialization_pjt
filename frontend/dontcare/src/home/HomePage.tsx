@@ -22,7 +22,7 @@ export function HomePage() {
             <Button
               onClick={handleLogout}
               disabled={isLoading}
-              variant="outline"
+              variant="outline" 
               className="px-6 py-2"
             >
               {isLoading ? '로그아웃 중...' : '로그아웃'}
