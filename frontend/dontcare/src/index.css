@@ -73,7 +73,7 @@
   --RING: rgba(255, 255, 255, 0.12);
 }
 
-/* +++++++++++++ */
+/* +++++++++++++ v1 */
 
 @layer utilities {
   .gradient-text {
@@ -81,28 +81,7 @@
     @apply bg-gradient-to-r from-[#E9D5FF] via-[#C4B5FD] to-[#A78BFA]/80 bg-clip-text text-transparent;
   }
 
-  .gradient-border {
-    position: relative;
-  }
-  .gradient-border::before {
-    content: '';
-    position: absolute;
-    inset: -1px;
-    background: linear-gradient(
-      90deg,
-      rgba(255, 255, 255, 0.35),
-      rgba(124, 58, 237, 0.4),
-      rgba(34, 211, 238, 0.4)
-    );
-    border-radius: calc(var(--RADIUS-XL) + 1px);
-    -webkit-mask:
-      linear-gradient(#000 0 0) content-box,
-      linear-gradient(#000 0 0);
-    -webkit-mask-composite: xor;
-    mask-composite: exclude;
-    padding: 1px;
-    pointer-events: none;
-  }
+  
 
   .btn-cta {
     @apply inline-flex items-center gap-2 rounded-xl border px-4 py-2 text-sm font-medium transition-[transform,background-color,border-color,color] duration-150 ease-out focus:outline-none focus-visible:ring-2 focus-visible:ring-white/60 focus-visible:ring-offset-2 focus-visible:ring-offset-background;
@@ -112,9 +91,7 @@
     @apply btn-cta border-white/20 bg-white/5 text-white/95 shadow-2xl backdrop-blur-md hover:bg-white/10 active:scale-[.98];
   }
 
-  .divider-line {
-    @apply h-px w-full bg-white/15;
-  }
+  
 
   /* Subtle outer glow for big titles */
   .text-glow {

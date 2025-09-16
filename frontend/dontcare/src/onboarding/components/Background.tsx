@@ -3,19 +3,32 @@ import { ONBOARDING_ASSETS } from '@/onboarding/constants/ONBOARDING_ASSETS';
 export function Background() {
   return (
     <div aria-hidden="true" className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
-      {/* Dark base with subtle radial glows to mimic reference */}
-      <div className="absolute inset-0 bg-black" />
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(600px_300px_at_18%_22%,rgba(167,139,250,0.16),transparent),radial-gradient(800px_420px_at_82%_28%,rgba(99,102,241,0.12),transparent)]" />
-      {/* keep a faint animated aurora for depth */}
-      <div className="bg-aurora/30 absolute inset-0 bg-[length:200%_200%] motion-safe:animate-aurora motion-reduce:animate-none" />
+      {/* 1) Gradient mesh base */}
+      <div className="absolute inset-0 bg-[radial-gradient(900px_520px_at_12%_6%,rgba(124,58,237,0.18),transparent_60%),radial-gradient(1000px_600px_at_88%_10%,rgba(34,211,238,0.08),transparent_48%),radial-gradient(800px_620px_at_50%_90%,rgba(59,130,246,0.12),transparent_55%),linear-gradient(180deg,#05060f_0%,#0b0f2a_45%,#06080f_100%)]" />
 
-      {/* Concentric arch behind the title */}
+      {/* 2) Animated aurora sweep */}
+      <div className="absolute inset-0 bg-aurora/35 bg-[length:200%_200%] mix-blend-screen motion-safe:animate-aurora motion-reduce:animate-none" />
+
+      {/* 3) Subtle grid overlay with center fade */}
+      <div className="absolute inset-[-1px] bg-grid opacity-[0.09] [background-size:200%_100%] mix-blend-overlay motion-safe:animate-gridpan mask-fade" />
+
+      {/* 4) Grain for texture */}
+      <div className="absolute inset-0 bg-noise opacity-[.035] mix-blend-soft-light" />
+
+      {/* 5) Vignette to focus center */}
+      <div className="absolute inset-0 bg-[radial-gradient(80%_55%_at_50%_30%,transparent,rgba(0,0,0,0.55))]" />
+
+      {/* 6) Soft color glows */}
+      <div className="absolute -top-24 -left-24 h-[460px] w-[460px] rounded-full bg-[#7c3aed]/30 blur-[120px]" />
+      <div className="absolute -top-24 -right-16 h-[360px] w-[360px] rounded-full bg-[#22d3ee]/12 blur-[110px]" />
+      <div className="absolute bottom-[-10%] left-1/2 h-[520px] w-[520px] -translate-x-1/2 rounded-full bg-[#3b82f6]/20 blur-[140px]" />
+
+      {/* 7) Concentric arch and floating accents (kept, now pop over new base) */}
       <img
         src={ONBOARDING_ASSETS.BG.ARCH}
         alt=""
         className="pointer-events-none absolute left-1/2 top-[12%] h-[420px] -translate-x-1/2 transform-gpu opacity-80 motion-safe:animate-float-slow motion-reduce:transform-none sm:h-[500px]"
       />
-      {/* Floating accents */}
       <img
         src={ONBOARDING_ASSETS.BG.SHAPE}
         alt=""
