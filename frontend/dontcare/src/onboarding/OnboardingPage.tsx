@@ -29,6 +29,8 @@ export function OnboardingPage() {
           hashNavigation={{ watchState: true }}
           modules={[Mousewheel, Pagination, HashNavigation]}
           className="relative z-10 h-dvh"
+          preventClicks={false}
+          preventClicksPropagation={false}
         >
           <SwiperSlide data-hash="hero">
             <section id="hero" className="flex min-h-dvh items-center justify-center">
