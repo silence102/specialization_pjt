@@ -66,6 +66,9 @@ const router = createBrowserRouter(
           ...createLazyRoute('/home', () => import('@/home/HomePage')),
         },
         {
+          ...createLazyRoute('/workbench', () => import('@/workbench/AgentWorkbenchPage')),
+        },
+        {
           path: '*',
           async lazy() {
             const { NotFoundPage } = await import('@/shared/pages/NotFoundPage');
